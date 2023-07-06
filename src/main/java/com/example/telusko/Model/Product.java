@@ -5,6 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Product {
@@ -15,12 +18,18 @@ public class Product {
 	private Integer id;
 	
 	@Column(unique = true)
+	@NotNull(message="product name can't be empty!")
 	private String productName; 	
 	
+	@NotNull(message="product description can't be empty!")
 	private String description;
 	
+	@NotNull
 	private Double price;
 	
+	@NotNull
+	@Min(0)
+	@Max(10000)
 	private int quantity;
 
 	public int getQuantity() {

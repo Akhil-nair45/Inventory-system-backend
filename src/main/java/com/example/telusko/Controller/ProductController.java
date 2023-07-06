@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +19,9 @@ import com.example.telusko.Model.Sold;
 import com.example.telusko.Service.ProductServ;
 import com.example.telusko.Service.SoldService;
 
-@CrossOrigin(origins="http://localhost:3000")
+import jakarta.validation.Valid;
+
+@CrossOrigin(origins="http://localhost:3002")
 @RestController
 public class ProductController {
 
@@ -29,10 +32,6 @@ public class ProductController {
 	private SoldService serv1;
 	
 	
-
-
-	
-
 	    // Mapping to handle the update operation
 	    @PostMapping("/updateProductQuantity")
 	    public String updateProductQuantity(@RequestBody Sold sold) {
@@ -42,43 +41,33 @@ public class ProductController {
 	        {
 	        	System.out.println("product found ");
 	        	product=productList.get(0);
-	        }
-	        
+	        }	        
 	        else
-	        {
+	        { 
 	        	return "no product available";
-	        }
-	        
+	        }	        
 	        if(product.getQuantity() <sold.getQty() ) {
 	        	return " Cannot place order as available quantity is : " + product.getQuantity();
-	        }
-	        
+	        }	        
 	        if (product != null && product.getProductName().equals(sold.getpName())) {
 	            Integer newQuantity = product.getQuantity() - (sold.getQty());
 	            product.setQuantity(newQuantity);
 	           serv.saveproduct(product);
 	           System.out.println("inserting into sold ");
 	           serv1.saveProduct(sold);
-	           
 	        }
-
 	        return "Quantity Updated"; // Redirect to the product listing page
 	    }
-	
-	
-	
-	
-	
-	
-	
+
 
 	@PostMapping("/saveproduct")
-	public ResponseEntity<?> saveproduct(@RequestBody Product product) {
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+	public ResponseEntity<?> saveproduct(@RequestBody @Valid Product product) {
 		return new ResponseEntity<>(serv.saveproduct(product), HttpStatus.CREATED);
 	}
 	
 	
-	@GetMapping("/")
+	@GetMapping("/findAllProducts")
 	public ResponseEntity<?> getAllProducts() {
 		return new ResponseEntity<>(serv.getAllProduct(),HttpStatus.OK);
 	}
@@ -91,12 +80,14 @@ public class ProductController {
 	
 	
 	@GetMapping("/deleteproduct/{id}")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<?> deleteproduct(@PathVariable Integer id) {
 		return new ResponseEntity<>(serv.deleteproduct(id), HttpStatus.OK);
 	}
 	
 	
 	@PutMapping("/editproduct")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<?> editproduct(@RequestBody Product product) {
 		System.out.println("edit");
 		return new ResponseEntity<>(serv.saveproduct(product), HttpStatus.CREATED);
